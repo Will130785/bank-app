@@ -15,6 +15,9 @@ const transferTo = document.querySelector('.form__input--to')
 const transferAmt = document.querySelector('.form__input--amount')
 const loanBtn = document.querySelector('.form__btn--loan')
 const loanAmt = document.querySelector('.form__input--loan-amount')
+const closeBtn = document.querySelector('.form__btn--close')
+const confirmUser = document.querySelector('.form__input--user')
+const confirmPin = document.querySelector('.form__input--pin')
 
 // Data
 const accountData = [
@@ -51,11 +54,12 @@ const accountData = [
 
 // Set empty logged in User object
 const loggedInUser = {}
+let userIndex
 
 // Handle login function
 const handleLogin = (e) => {
   e.preventDefault()
-  accountData.forEach(item => {
+  accountData.forEach((item, index) => {
     if (item.user === user.value && item.pin === Number(pin.value)) {
       // Start logout timer
       logoutUser()
@@ -63,6 +67,9 @@ const handleLogin = (e) => {
       // If credentials are correct display app screen
       mainApp.style.opacity = 1
       console.log(item)
+      // Set user index
+      userIndex = index
+      console.log(userIndex)
       // Set logged in user details
       loggedInUser.name = item.owner
       loggedInUser.movements = item.movements
@@ -165,21 +172,50 @@ const handleTransfer = (e) => {
   console.log(transferAmt.value)
   accountData.filter(item => {
     if (item.user === transferTo.value) {
+      accountData[userIndex].movements.push(Number(-transferAmt.value))
       return item.movements.push(Number(transferAmt.value))
     } else {
       return
     }
   })
   console.log(accountData)
+  // Get balance
+  getAccountBalance(accountData[userIndex])
+  // Get summary
+  getAccountSummary(accountData[userIndex])
+  // Display transactions
+  displayTransactions(accountData[userIndex])
 }
 
 // Function to request loan
 const handleLoadRequest = (e) => {
   e.preventDefault()
   console.log(loanAmt.value)
+  accountData[userIndex].movements.push(Number(loanAmt.value))
+  // Get balance
+  getAccountBalance(accountData[userIndex])
+  // Get summary
+  getAccountSummary(accountData[userIndex])
+  // Display transactions
+  displayTransactions(accountData[userIndex])
+}
+
+// Function to close account
+const closeAccount = (e) => {
+  e.preventDefault()
+  console.log(confirmUser.value)
+  console.log(confirmPin.value)
+  accountData.forEach((item, index) => {
+    if (item.user === confirmUser.value && item.pin === Number(confirmPin.value)) {
+      console.log('Match')
+      accountData.splice(index, 1)
+    }
+  })
+  console.log(accountData)
 }
 
 // Event listeners
 login.addEventListener('click', handleLogin)
 transferBtn.addEventListener('click', handleTransfer)
 loanBtn.addEventListener('click', handleLoadRequest)
+closeBtn.addEventListener('click', closeAccount)
